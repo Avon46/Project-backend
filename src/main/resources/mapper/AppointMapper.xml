@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.appointdemo.mapper.AppointMapper">
+
+    <select id="findUnfinishedAppoints"
+            resultType="com.example.appointdemo.dto.AppointQueryResponse">
+        SELECT
+            a3.SNO AS sno,
+            a3.LIST_NO AS listNo,
+            b1.CAMP_NAME AS campName,
+            a8.CUST_NAME AS custName,
+            a3.RECALL_TIME AS recallTime,
+            a1.LIST_LASTPHONE AS listLastphone,
+            b1.CAMP_SERVICE_DT AS campServiceDt
+        FROM tbca003 a3
+        JOIN tbca001 a1
+            ON a3.LIST_NO = a1.LIST_NO
+        JOIN tbca008 a8
+            ON a1.CUST_NO = a8.CUST_NO
+        JOIN tbcb001 b1
+            ON a3.LIST_CAMPCODE = b1.CAMP_CODE
+        WHERE a3.RECALL_TIME BETWEEN #{startTime} AND #{endTime}
+          AND a3.REC_TIME IS NULL
+        ORDER BY a3.RECALL_TIME ASC
+    </select>
+
+    <update id="updateAppoint">
+        UPDATE tbca003
+        SET
+            RECALL_TIME = #{recallTime},
+            UPDATE_TIME = NOW(),
+            UPDATE_USER = #{updateUser}
+        WHERE SNO = #{sno}
+          AND REC_TIME IS NULL
+    </update>
+
+</mapper>
