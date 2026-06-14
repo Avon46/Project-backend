@@ -1,7 +1,7 @@
 package com.example.appointdemo.controller;
 
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,9 +27,11 @@ public class CustomerCommandController {
 
     @PostMapping("/updateAppoint")
     public ResponseEntity<ApiResponse<EmptyResponse>> updateAppoint(
-            @RequestBody UpdateAppointRequest request) {
+            @RequestBody UpdateAppointRequest request,
+            Authentication authentication) {
         try {
-            ApiResponse<EmptyResponse> response = appointService.updateAppoint(request);
+            String updateUser = authentication.getName();
+            ApiResponse<EmptyResponse> response = appointService.updateAppoint(request, updateUser);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.ok(
