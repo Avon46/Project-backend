@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.appointdemo.dto.ApiResponse;
 import com.example.appointdemo.dto.AppointQueryResponse;
@@ -30,7 +31,10 @@ public class AppointService {
         return appointMapper.findUnfinishedAppoints(startTime, endTime);
     }
 
-    public ApiResponse<EmptyResponse> updateAppoint(UpdateAppointRequest request) {
+    @Transactional
+    public ApiResponse<EmptyResponse> updateAppoint(
+            UpdateAppointRequest request,
+            String updateUser) {
         if (request == null || request.getSno() == null) {
             throw new IllegalArgumentException("【流水號】不得為空");
         }
@@ -39,8 +43,9 @@ public class AppointService {
             throw new IllegalArgumentException("【約訪時間設定值】不得為空");
         }
 
-        // TODO 正式版需改為當前登入者員編 CathayNo
-        String updateUser = "TEST_USER";
+        if (updateUser == null || updateUser.isBlank()) {
+            throw new IllegalArgumentException("【更新人員】不得為空");
+        }
 
         try {
             int updatedCount = appointMapper.updateAppoint(
@@ -55,7 +60,8 @@ public class AppointService {
             return ApiResponse.fail(new EmptyResponse(), "更新失敗");
 
         } catch (Exception e) {
-            log.error("異動約訪記錄檔失敗，sno={}", request.getSno(), e);
+            log.error("異動約訪記錄檔失敗，sno={}, updateUser={}",
+                    request.getSno(), updateUser, e);
             return ApiResponse.fail(new EmptyResponse(), "更新失敗");
         }
     }
